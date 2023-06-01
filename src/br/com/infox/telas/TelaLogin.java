@@ -191,7 +191,12 @@ public class TelaLogin extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_loginActionPerformed
 
     private void btn_loginKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btn_loginKeyPressed
-        
+        try {
+            // chamando o metodo logar
+            logar();
+        } catch (SQLException ex) {
+            Logger.getLogger(TelaLogin.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_btn_loginKeyPressed
 
     /**
