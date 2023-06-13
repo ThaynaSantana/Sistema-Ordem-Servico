@@ -1,9 +1,8 @@
 # Sistema-Ordem-Servico
 Sistema que gerencia os <br>
 Clientes, Usuarios e Ordens de serviços para Assistencias Tecnicas. <br>
-<strong>Desenvolvido em Java</strong>
-<<<<<<< HEAD
-<strong>by Thayna Santana</strong>
+<h3>Desenvolvido em Java<br>
+by Thayna Santana<h3><br>
 =======
 ## Tela de Login
 ![Captura de tela 2023-06-07 113155](https://github.com/ThaynaSantana/Sistema-Ordem-Servico/assets/88935936/2bd34b53-1e7e-480c-a154-bc11a983d5c1)
