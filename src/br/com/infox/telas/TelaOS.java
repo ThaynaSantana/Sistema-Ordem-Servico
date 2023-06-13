@@ -45,6 +45,16 @@ public class TelaOS extends javax.swing.JInternalFrame {
         text_cliente_selecionado.setText("Selecionado o cliente: " + nome_cliente + "!");
     }
 
+    private void limpar() {
+        input_equipamento.setText(null);
+        input_defeito.setText(null);
+        input_servico.setText(null);
+        input_tecnico.setText(null);
+        input_valor.setText(null);
+        txt_data.setText("Data: ");
+        txt_os.setText("X");
+    }
+
     private void adicionar() {
         String sql = "insert into ordemservicos(equipamento, defeito, servico, tecnico, valor, id) values(?,?,?,?,?,?) ";
         // Pegando o ID do cliente selecionado na tabela
@@ -83,8 +93,14 @@ public class TelaOS extends javax.swing.JInternalFrame {
             pst = conexao.prepareStatement(sql);
             rs = pst.executeQuery();
             if (rs.next()) {
-                txt_os.setText("N° OS: " + rs.getString(1));
+                txt_os.setText(rs.getString(1));
                 txt_data.setText("Data: " + rs.getString(2));
+                input_equipamento.setText(rs.getString(3));
+                input_defeito.setText(rs.getString(4));
+                input_servico.setText(rs.getString(5));
+                input_tecnico.setText(rs.getString(6));
+                input_valor.setText(rs.getString(7));
+
                 // desativando os outros botões para evitar bugs
                 botao_adicionar.setEnabled(false);
                 input_cliente.setEnabled(false);
@@ -101,12 +117,9 @@ public class TelaOS extends javax.swing.JInternalFrame {
     }
 
     private void editar() {
-        String sql = "update ordemservicos equipamento=?, defeito=?, servico=?, tecnico=?, valor=? where os=?";
-        String ID = table_clientes.getModel().getValueAt(table_clientes.getSelectedRow(), 0).toString();
-        if (ID.equals("")) {
-            JOptionPane.showMessageDialog(null, "Nenhum cliente foi selecionado!, pesquise e selecione.", "ERROR", JOptionPane.ERROR_MESSAGE);
-        } else if (input_equipamento.getText().equals("") || input_defeito.getText().equals("") || input_servico.getText().equals("") || input_tecnico.getText().equals("") || input_valor.getText().equals("")) {
-            JOptionPane.showMessageDialog(null, "Preencha TODOS os campos para cadastrar uma ordem de serviço!", "ERROR", JOptionPane.ERROR_MESSAGE);
+        String sql = "update ordemservicos set equipamento=?, defeito=?, servico=?, tecnico=?, valor=? where os=?";
+        if (input_equipamento.getText().equals("") || input_defeito.getText().equals("") || input_servico.getText().equals("") || input_tecnico.getText().equals("") || input_valor.getText().equals("")) {
+            JOptionPane.showMessageDialog(null, "Consulte antes para alterar uma ordem de serviço!", "ERROR", JOptionPane.ERROR_MESSAGE);
 
         } else {
             try {
@@ -117,12 +130,15 @@ public class TelaOS extends javax.swing.JInternalFrame {
                 pst.setString(4, input_tecnico.getText());
                 // .replace substitui a virgula pelo ponto
                 pst.setString(5, input_valor.getText().replace(",", "."));
-                pst.setString(6, ID);
-                pst.setString(7, txt_os.getText());
-
+                pst.setString(6, txt_os.getText());
                 // atualizando o bando db com dados novos
                 pst.executeUpdate();
                 JOptionPane.showMessageDialog(null, "Cadastro de Ordem de Serviço feito com sucesso!");
+                limpar();
+                // habilitar os objetos desativados
+                botao_adicionar.setEnabled(true);
+                input_cliente.setEnabled(true);
+                table_clientes.setVisible(true);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, e);
                 System.out.println(e);
@@ -131,7 +147,22 @@ public class TelaOS extends javax.swing.JInternalFrame {
     }
 
     private void excluir() {
-
+        String sql = "delete from ordemservicos where os=?";
+        if(txt_os.getText().equals("X")){
+            JOptionPane.showMessageDialog(null,"Nenhuma Ordem de serviço foi selecionada, não é possivel fazer a excluzão... consulte uma OS antes de tentar excluir");
+        } else {
+            int confirm = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja remover esta ordem de serviço?", "ATENÇÃO", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                pst = conexao.prepareStatement(sql);
+                pst.setString(1, txt_os.getText());
+                pst.executeUpdate();
+                JOptionPane.showMessageDialog(null, "Ordem de serviço deletado com sucesso.");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, e);
+            }
+        }
+        }
     }
 
     /**
@@ -166,6 +197,7 @@ public class TelaOS extends javax.swing.JInternalFrame {
         botao_consultar = new javax.swing.JToggleButton();
         botao_adicionar = new javax.swing.JToggleButton();
         botao_imprimir = new javax.swing.JToggleButton();
+        label_os = new javax.swing.JLabel();
         txt_os = new javax.swing.JLabel();
 
         setClosable(true);
@@ -212,6 +244,11 @@ public class TelaOS extends javax.swing.JInternalFrame {
         botao_editar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/infox/icones/update.png"))); // NOI18N
         botao_editar.setMinimumSize(new java.awt.Dimension(50, 51));
         botao_editar.setPreferredSize(new java.awt.Dimension(30, 31));
+        botao_editar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botao_editarActionPerformed(evt);
+            }
+        });
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Cliente"));
 
@@ -309,7 +346,8 @@ public class TelaOS extends javax.swing.JInternalFrame {
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
-        txt_data.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
+        txt_data.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
+        txt_data.setForeground(new java.awt.Color(255, 0, 51));
         txt_data.setText("Data: DD/MM/AAAA");
 
         input_defeito.addActionListener(new java.awt.event.ActionListener() {
@@ -327,6 +365,11 @@ public class TelaOS extends javax.swing.JInternalFrame {
         botao_excluir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/infox/icones/delete.png"))); // NOI18N
         botao_excluir.setMinimumSize(new java.awt.Dimension(50, 51));
         botao_excluir.setPreferredSize(new java.awt.Dimension(30, 31));
+        botao_excluir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botao_excluirActionPerformed(evt);
+            }
+        });
 
         botao_consultar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/infox/icones/search_icon_64.png"))); // NOI18N
         botao_consultar.setMinimumSize(new java.awt.Dimension(50, 51));
@@ -350,9 +393,15 @@ public class TelaOS extends javax.swing.JInternalFrame {
         botao_imprimir.setMinimumSize(new java.awt.Dimension(50, 51));
         botao_imprimir.setPreferredSize(new java.awt.Dimension(30, 31));
 
+        label_os.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
+        label_os.setForeground(new java.awt.Color(0, 102, 255));
+        label_os.setText("N° OS:   ");
+        label_os.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
         txt_os.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
-        txt_os.setText("N° OS:   ");
-        txt_os.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        txt_os.setForeground(new java.awt.Color(0, 102, 255));
+        txt_os.setText("X");
+        txt_os.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -380,6 +429,8 @@ public class TelaOS extends javax.swing.JInternalFrame {
                             .addComponent(jLabel5))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(label_os)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txt_os)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txt_data)
@@ -401,9 +452,11 @@ public class TelaOS extends javax.swing.JInternalFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txt_os)
-                    .addComponent(txt_data))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txt_data)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txt_os)
+                        .addComponent(label_os)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -435,7 +488,7 @@ public class TelaOS extends javax.swing.JInternalFrame {
                     .addComponent(botao_consultar, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(botao_excluir, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(botao_editar, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(27, Short.MAX_VALUE))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         pack();
@@ -506,6 +559,22 @@ public class TelaOS extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_table_clientesMouseClicked
 
+    private void botao_editarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botao_editarActionPerformed
+        try {
+            editar();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }//GEN-LAST:event_botao_editarActionPerformed
+
+    private void botao_excluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botao_excluirActionPerformed
+        try {
+            excluir();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }//GEN-LAST:event_botao_excluirActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton botao_adicionar;
@@ -528,6 +597,7 @@ public class TelaOS extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel label_os;
     private javax.swing.JTable table_clientes;
     private javax.swing.JLabel text_cliente_selecionado;
     private javax.swing.JLabel txt_data;

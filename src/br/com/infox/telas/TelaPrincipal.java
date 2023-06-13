@@ -1,21 +1,28 @@
 
 package br.com.infox.telas;
 
+import br.com.infox.dal.ModuloConexao;
 import java.text.DateFormat;
 import java.util.Date;
 import javax.swing.JOptionPane;
+import java.sql.*;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  *
  * @author thay
  */
 public class TelaPrincipal extends javax.swing.JFrame {
-
+    
+    Connection conexao = null;
     /**
      * Creates new form TelaPrincipal
      */
     public TelaPrincipal() {
         initComponents();
+        conexao = ModuloConexao.conector();
     }
 
     /**
@@ -30,12 +37,14 @@ public class TelaPrincipal extends javax.swing.JFrame {
         desktop = new javax.swing.JDesktopPane();
         lbl_data = new javax.swing.JLabel();
         lbl_usuario = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
         menu = new javax.swing.JMenuBar();
         menu_cadastro = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         menu_os = new javax.swing.JMenuItem();
         menu_usuarios = new javax.swing.JMenuItem();
         menu_relatorio = new javax.swing.JMenu();
+        menu_rel_clientes = new javax.swing.JMenuItem();
         menu_rel_os = new javax.swing.JMenuItem();
         menu_ajuda = new javax.swing.JMenu();
         menu_sobre = new javax.swing.JMenuItem();
@@ -71,6 +80,8 @@ public class TelaPrincipal extends javax.swing.JFrame {
         lbl_usuario.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         lbl_usuario.setText("Usuario");
 
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/infox/icones/icon_pc.png"))); // NOI18N
+
         menu_cadastro.setText("Cadastro");
 
         jMenuItem1.setText("Cliente");
@@ -102,6 +113,14 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
         menu_relatorio.setText("Relatorio");
         menu_relatorio.setEnabled(false);
+
+        menu_rel_clientes.setText("Clientes");
+        menu_rel_clientes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menu_rel_clientesActionPerformed(evt);
+            }
+        });
+        menu_relatorio.add(menu_rel_clientes);
 
         menu_rel_os.setText("Ordem Serviço");
         menu_relatorio.add(menu_rel_os);
@@ -143,20 +162,23 @@ public class TelaPrincipal extends javax.swing.JFrame {
                 .addComponent(desktop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lbl_usuario)
                     .addComponent(lbl_data)
-                    .addComponent(lbl_usuario))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(desktop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(55, 55, 55)
                         .addComponent(lbl_usuario)
                         .addGap(31, 31, 31)
-                        .addComponent(lbl_data))
-                    .addComponent(desktop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(lbl_data)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -205,6 +227,22 @@ public class TelaPrincipal extends javax.swing.JFrame {
        desktop.add(tela_os);
     }//GEN-LAST:event_menu_osActionPerformed
 
+    private void menu_rel_clientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menu_rel_clientesActionPerformed
+        //Gerando o relatorio de clientes
+        int confirma = JOptionPane.showConfirmDialog(null, "Deseja gera o relatorio de todos os clientes?", "ATENÇÃO", JOptionPane.YES_NO_OPTION);
+        if(confirma == JOptionPane.YES_OPTION){
+            // imprimindo o relatorio com framework JasperReports
+            try{
+                // Usando a classe JasperPrint para preaprar a impressao de um relatorio
+                JasperPrint print = JasperFillManager.fillReport("C:/Users/thay/Documents/NetBeansProjects/projeto-infox1/reports/clientes.jasper",null,conexao);
+                // exibindo o relatorio pela classe JasperViewer
+                JasperViewer.viewReport(print,false);
+            } catch(Exception e){
+                JOptionPane.showMessageDialog(null,e);
+            }
+        }
+    }//GEN-LAST:event_menu_rel_clientesActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -242,6 +280,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JDesktopPane desktop;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JLabel lbl_data;
     public static javax.swing.JLabel lbl_usuario;
@@ -250,6 +289,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
     private javax.swing.JMenu menu_cadastro;
     private javax.swing.JMenu menu_opcoes;
     private javax.swing.JMenuItem menu_os;
+    private javax.swing.JMenuItem menu_rel_clientes;
     private javax.swing.JMenuItem menu_rel_os;
     public static javax.swing.JMenu menu_relatorio;
     private javax.swing.JMenuItem menu_sair;
